@@ -65,18 +65,8 @@ class _LocationInputState extends State<LocationInput> {
       _pickedLocation =
           PlaceLocation(latitude: lat, longitude: lng, address: address);
     });
-  }
 
-  int lonToTileX() {
-    return ((_pickedLocation!.longitude + 180.0) / 360.0 * (1 << 16)).toInt();
-  }
-
-  int latToTileY() {
-    double sinLatitude = sin(_pickedLocation!.latitude * pi / 180.0);
-    return ((1 - log((1 + sinLatitude) / (1 - sinLatitude)) / pi) /
-            2 *
-            (1 << 16))
-        .toInt();
+    print(address);
   }
 
   @override
@@ -102,7 +92,7 @@ class _LocationInputState extends State<LocationInput> {
         children: [
           TileLayer(
             urlTemplate:
-                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
           ),
           MarkerLayer(
             markers: [
