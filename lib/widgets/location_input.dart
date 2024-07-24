@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:favorite_places_app/models/place.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
-import 'package:http/http.dart' as http;
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -20,24 +21,20 @@ class _LocationInputState extends State<LocationInput> {
   var _isGettingLocation = false;
 
   void _getCurrentLocation() async {
-    Location location = Location();
-
     bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
+    LocationPermission permission;
+    Position position;
 
-    serviceEnabled = await location.serviceEnabled();
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return;
-      }
+      return;
     }
 
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
         return;
       }
     }
@@ -48,20 +45,18 @@ class _LocationInputState extends State<LocationInput> {
       _isGettingLocation = true;
     });
 
-    locationData = await location.getLocation();
-    final lat = locationData.latitude;
-    final lng = locationData.longitude;
+    position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
 
-    if (lat == null || lng == null) {
-      return;
-    }
+    final lat = position.latitude;
+    final lng = position.longitude;
 
-    final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=YOUR_API_KEY');
+    List<Placemark> placemark = await placemarkFromCoordinates(lat, lng);
+    Placemark place = placemark[0];
 
-    final response = await http.get(url);
-    final resData = jsonDecode(response.body);
-    final address = resData['result'][0]['formatted_address'];
+    final address =
+        '${place.street}, ${place.administrativeArea}, ${place.country}';
 
     // after getting location make it again false coz we get location now
     // we show location on screen
@@ -70,6 +65,18 @@ class _LocationInputState extends State<LocationInput> {
       _pickedLocation =
           PlaceLocation(latitude: lat, longitude: lng, address: address);
     });
+  }
+
+  int lonToTileX() {
+    return ((_pickedLocation!.longitude + 180.0) / 360.0 * (1 << 16)).toInt();
+  }
+
+  int latToTileY() {
+    double sinLatitude = sin(_pickedLocation!.latitude * pi / 180.0);
+    return ((1 - log((1 + sinLatitude) / (1 - sinLatitude)) / pi) /
+            2 *
+            (1 << 16))
+        .toInt();
   }
 
   @override
@@ -87,24 +94,29 @@ class _LocationInputState extends State<LocationInput> {
 
     if (_pickedLocation != null) {
       previewContent = FlutterMap(
-        options: const MapOptions(
-          initialCenter: LatLng(51.5, -0.09),
-          initialZoom: 13.0,
+        options: MapOptions(
+          initialCenter:
+              LatLng(_pickedLocation!.latitude, _pickedLocation!.longitude),
+          initialZoom: 16,
         ),
         children: [
           TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            urlTemplate:
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
           ),
-          const MarkerLayer(
+          MarkerLayer(
             markers: [
               Marker(
                 width: 80.0,
                 height: 80.0,
-                point: LatLng(51.5, -0.09),
+                point: LatLng(
+                    _pickedLocation!.latitude, _pickedLocation!.longitude),
                 child: Icon(
                   Icons.location_on,
                   color: Colors.red,
                   size: 40.0,
+                  semanticLabel:
+                      '${_pickedLocation!.latitude}, ${_pickedLocation!.longitude}',
                 ),
               ),
             ],
