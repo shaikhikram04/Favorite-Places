@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:favorite_places_app/models/place.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
@@ -15,7 +16,7 @@ class LocationInput extends StatefulWidget {
 }
 
 class _LocationInputState extends State<LocationInput> {
-  Location? _pickedLocation;
+  PlaceLocation? _pickedLocation;
   var _isGettingLocation = false;
 
   void _getCurrentLocation() async {
@@ -51,24 +52,28 @@ class _LocationInputState extends State<LocationInput> {
     final lat = locationData.latitude;
     final lng = locationData.longitude;
 
-    final url = Uri.parse('https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=YOUR_API_KEY');
-    
-    final response = await http.get(url);
-    final resData =  jsonDecode(response.body);
-    final address = resData['result'][0]['formatted_address'];
+    if (lat == null || lng == null) {
+      return;
+    }
 
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=YOUR_API_KEY');
+
+    final response = await http.get(url);
+    final resData = jsonDecode(response.body);
+    final address = resData['result'][0]['formatted_address'];
 
     // after getting location make it again false coz we get location now
     // we show location on screen
     setState(() {
       _isGettingLocation = false;
-      _pickedLocation = location;
+      _pickedLocation =
+          PlaceLocation(latitude: lat, longitude: lng, address: address);
     });
-
   }
 
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     Widget previewContent = Text(
       'No location chosen.',
       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
@@ -83,7 +88,6 @@ class _LocationInputState extends State<LocationInput> {
     if (_pickedLocation != null) {
       previewContent = FlutterMap(
         options: const MapOptions(
-
           initialCenter: LatLng(51.5, -0.09),
           initialZoom: 13.0,
         ),
@@ -97,11 +101,11 @@ class _LocationInputState extends State<LocationInput> {
                 width: 80.0,
                 height: 80.0,
                 point: LatLng(51.5, -0.09),
-                 child: Icon(
-                   Icons.location_on,
-                   color: Colors.red,
-                   size: 40.0,
-                 ),
+                child: Icon(
+                  Icons.location_on,
+                  color: Colors.red,
+                  size: 40.0,
+                ),
               ),
             ],
           ),
