@@ -99,12 +99,10 @@ class _LocationInputState extends State<LocationInput> {
               Marker(
                 point: LatLng(
                     _pickedLocation!.latitude, _pickedLocation!.longitude),
-                child: Icon(
+                child: const Icon(
                   Icons.location_on,
                   color: Colors.red,
                   size: 40.0,
-                  semanticLabel:
-                      '${_pickedLocation!.latitude}, ${_pickedLocation!.longitude}',
                 ),
               ),
             ],
