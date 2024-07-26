@@ -1,7 +1,7 @@
 import 'package:favorite_places_app/models/place.dart';
+import 'package:favorite_places_app/screens/map.dart';
+import 'package:favorite_places_app/widgets/map_snapshot.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 
 class PlaceDetailScreen extends StatelessWidget {
   const PlaceDetailScreen({super.key, required this.place});
@@ -28,38 +28,21 @@ class PlaceDetailScreen extends StatelessWidget {
             right: 0,
             child: Column(
               children: [
-                SizedBox.square(
-                  dimension: 180,
-                  child: ClipOval(
-                    child: FlutterMap(
-                      options: MapOptions(
-                        initialCenter: LatLng(
-                            place.location.latitude, place.location.longitude),
-                        initialZoom: 17,
-                        interactionOptions: const InteractionOptions(
-                            flags: ~InteractiveFlag.doubleTapZoom),
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate:
-                              "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                          userAgentPackageName:
-                              'dev.fleaflet.flutter_map.example',
-                        ),
-                        MarkerLayer(
-                          markers: [
-                            Marker(
-                              point: LatLng(place.location.latitude,
-                                  place.location.longitude),
-                              child: const Icon(
-                                Icons.location_on,
-                                color: Colors.red,
-                                size: 30.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                ClipOval(
+                  child: Container(
+                    color: Colors.red,
+                    height: 170,
+                    width: 170,
+                    child: MapSnapshot(
+                      location: place.location,
+                      onTapLocation: (tapPosition, point) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (ctx) => MapScreen(
+                            isSelecting: false,
+                            location: place.location,
+                          ),
+                        ));
+                      },
                     ),
                   ),
                 ),

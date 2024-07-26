@@ -1,10 +1,8 @@
 import 'package:favorite_places_app/models/place.dart';
+import 'package:favorite_places_app/widgets/map_snapshot.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
@@ -81,33 +79,9 @@ class _LocationInputState extends State<LocationInput> {
     }
 
     if (_pickedLocation != null) {
-      previewContent = FlutterMap(
-        options: MapOptions(
-          initialCenter:
-              LatLng(_pickedLocation!.latitude, _pickedLocation!.longitude),
-          initialZoom: 16.5,
-          interactionOptions:
-              const InteractionOptions(flags: ~InteractiveFlag.doubleTapZoom),
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-          ),
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: LatLng(
-                    _pickedLocation!.latitude, _pickedLocation!.longitude),
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: 40.0,
-                ),
-              ),
-            ],
-          ),
-        ],
+      previewContent = MapSnapshot(
+        location: _pickedLocation!,
+        onTapLocation: (tapPosition, point) {},
       );
     }
 
