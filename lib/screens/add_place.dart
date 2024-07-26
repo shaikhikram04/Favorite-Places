@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:favorite_places_app/models/place.dart';
 import 'package:favorite_places_app/widgets/image_input.dart';
 import 'package:favorite_places_app/widgets/location_input.dart';
 import 'package:favorite_places_app/provider/user_places.dart';
@@ -16,13 +17,14 @@ class AddPlaceScreen extends ConsumerStatefulWidget {
 class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
   final _titleController = TextEditingController();
   File? _selectedImage;
+  PlaceLocation? _selectedLocation;
 
   void showDialogBox() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Enter Complete Info'),
-        content: const Text('Please Enter place and its image.'),
+        content: const Text('Please Enter place, its image and location.'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         titleTextStyle: Theme.of(context).textTheme.titleLarge,
         contentTextStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
@@ -47,14 +49,16 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
 
   void _savePlace() {
     final enteredText = _titleController.text;
-    if (enteredText.isEmpty || _selectedImage == null) {
+    if (enteredText.isEmpty ||
+        _selectedImage == null ||
+        _selectedLocation == null) {
       showDialogBox();
       return;
     }
 
     ref
         .read(userPlacesProvider.notifier)
-        .addPlace(enteredText, _selectedImage!);
+        .addPlace(enteredText, _selectedImage!, _selectedLocation!);
     Navigator.of(context).pop();
   }
 
@@ -88,7 +92,11 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
               _selectedImage = image;
             }),
             const SizedBox(height: 10),
-            const LocationInput(),
+            LocationInput(
+              onSelectLocation: (location) {
+                _selectedLocation = location;
+              },
+            ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _savePlace,

@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:favorite_places_app/models/place.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -10,7 +7,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class LocationInput extends StatefulWidget {
-  const LocationInput({super.key});
+  const LocationInput({super.key, required this.onSelectLocation});
+
+  final void Function(PlaceLocation location) onSelectLocation;
 
   @override
   State<StatefulWidget> createState() => _LocationInputState();
@@ -65,8 +64,7 @@ class _LocationInputState extends State<LocationInput> {
       _pickedLocation =
           PlaceLocation(latitude: lat, longitude: lng, address: address);
     });
-
-    print(address);
+    widget.onSelectLocation(_pickedLocation!);
   }
 
   @override
@@ -87,18 +85,18 @@ class _LocationInputState extends State<LocationInput> {
         options: MapOptions(
           initialCenter:
               LatLng(_pickedLocation!.latitude, _pickedLocation!.longitude),
-          initialZoom: 16,
+          initialZoom: 16.5,
+          interactionOptions:
+              const InteractionOptions(flags: ~InteractiveFlag.doubleTapZoom),
         ),
         children: [
           TileLayer(
-            urlTemplate:
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            userAgentPackageName: 'dev.fleaflet.flutter_map.example',
           ),
           MarkerLayer(
             markers: [
               Marker(
-                width: 80.0,
-                height: 80.0,
                 point: LatLng(
                     _pickedLocation!.latitude, _pickedLocation!.longitude),
                 child: Icon(

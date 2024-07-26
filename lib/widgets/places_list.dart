@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 class PlacesList extends StatelessWidget {
   const PlacesList({super.key, required this.placeList});
+
   final List<Place> placeList;
 
   @override
@@ -30,6 +31,12 @@ class PlacesList extends StatelessWidget {
         title: Text(
           placeList[index].title,
           style: Theme.of(context).textTheme.titleMedium,
+        ),
+        subtitle: Text(
+          placeList[index].location.address,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(

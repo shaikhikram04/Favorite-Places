@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class PlaceDetailScreen extends StatelessWidget {
   const PlaceDetailScreen({super.key, required this.place});
+
   final Place place;
 
   @override
