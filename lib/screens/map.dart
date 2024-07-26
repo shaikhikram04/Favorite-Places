@@ -15,16 +15,25 @@ class MapScreen extends StatefulWidget {
   final bool isSelecting;
 
   @override
-  State<MapScreen> createState() => MapScreenState();
+  State<MapScreen> createState() => _MapScreenState();
 }
 
-class MapScreenState extends State<MapScreen> {
-  late LatLng coordinate;
+class _MapScreenState extends State<MapScreen> {
+  late LatLng _coordinate;
 
   @override
   void initState() {
-    coordinate = LatLng(widget.location.latitude, widget.location.longitude);
+    _coordinate = LatLng(widget.location.latitude, widget.location.longitude);
     super.initState();
+  }
+
+  void _markLocation(LatLng newCoordinate) {
+    if (widget.isSelecting == false) {
+      return;
+    }
+    setState(() {
+      _coordinate = newCoordinate;
+    });
   }
 
   @override
@@ -43,9 +52,26 @@ class MapScreenState extends State<MapScreen> {
       ),
       body: FlutterMap(
         options: MapOptions(
-          initialCenter: coordinate,
+          initialCenter: _coordinate,
+          initialZoom: 16,
+          onLongPress: (tapPosition, point) => _markLocation(point),
         ),
-        children: [],
+        children: [
+          TileLayer(
+            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+          ),
+          MarkerLayer(markers: [
+            Marker(
+              point: _coordinate,
+              child: const Icon(
+                Icons.location_on,
+                color: Colors.red,
+                size: 40,
+              ),
+            ),
+          ])
+        ],
       ),
     );
   }
