@@ -1,4 +1,5 @@
 import 'package:favorite_places_app/models/place.dart';
+import 'package:favorite_places_app/screens/map.dart';
 import 'package:favorite_places_app/widgets/map_snapshot.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -65,13 +66,54 @@ class _LocationInputState extends State<LocationInput> {
     widget.onSelectLocation(_pickedLocation!);
   }
 
+  void _saveLocation(PlaceLocation location) {
+    setState(() {
+      _pickedLocation = location;
+    });
+    widget.onSelectLocation(location);
+  }
+
+  void _getUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        return;
+      }
+    }
+
+    if (!context.mounted) {
+      return;
+    }
+
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => MapScreen(onSelectLocation: _saveLocation),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget previewContent = Text(
       'No location chosen.',
-      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+      style: Theme
+          .of(context)
+          .textTheme
+          .bodyLarge!
+          .copyWith(
+        color: Theme
+            .of(context)
+            .colorScheme
+            .onSurface,
+      ),
     );
 
     if (_isGettingLocation == true) {
@@ -94,7 +136,11 @@ class _LocationInputState extends State<LocationInput> {
           decoration: BoxDecoration(
             border: Border.all(
               width: 1,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary
+                  .withOpacity(0.2),
             ),
           ),
           child: previewContent,
@@ -108,7 +154,7 @@ class _LocationInputState extends State<LocationInput> {
               label: const Text('Get current location'),
             ),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: _getUserLocation,
               icon: const Icon(Icons.map),
               label: const Text('Select on Map'),
             ),
