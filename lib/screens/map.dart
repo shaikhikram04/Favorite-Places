@@ -21,12 +21,6 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   LatLng? _coordinate;
 
-  void _markLocation(LatLng newCoordinate) {
-    if (widget.isSelecting == false) {
-      return;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
