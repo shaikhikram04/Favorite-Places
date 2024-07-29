@@ -19,21 +19,12 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  late LatLng _coordinate;
-
-  @override
-  void initState() {
-    _coordinate = LatLng(widget.location.latitude, widget.location.longitude);
-    super.initState();
-  }
+  LatLng? _coordinate;
 
   void _markLocation(LatLng newCoordinate) {
     if (widget.isSelecting == false) {
       return;
     }
-    setState(() {
-      _coordinate = newCoordinate;
-    });
   }
 
   @override
@@ -54,25 +45,39 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: FlutterMap(
         options: MapOptions(
-          initialCenter: _coordinate,
+          initialCenter:
+              LatLng(widget.location.latitude, widget.location.longitude),
           initialZoom: 13,
-          onLongPress: (tapPosition, point) => _markLocation(point),
+          onLongPress: (widget.isSelecting)
+              ? (tapPosition, point) {
+                  setState(() {
+                    _coordinate = point;
+                  });
+                }
+              : null,
         ),
         children: [
           TileLayer(
             urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
             userAgentPackageName: 'dev.fleaflet.flutter_map.example',
           ),
-          MarkerLayer(markers: [
-            Marker(
-              point: _coordinate,
-              child: const Icon(
-                Icons.location_on,
-                color: Colors.red,
-                size: 40,
-              ),
-            ),
-          ])
+          MarkerLayer(
+              markers: (widget.isSelecting && _coordinate == null)
+                  ? []
+                  : [
+                      Marker(
+                        point: _coordinate ??
+                            LatLng(
+                              widget.location.latitude,
+                              widget.location.longitude,
+                            ),
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                          size: 40,
+                        ),
+                      ),
+                    ])
         ],
       ),
     );

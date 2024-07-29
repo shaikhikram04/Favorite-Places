@@ -19,6 +19,23 @@ class _LocationInputState extends State<LocationInput> {
   PlaceLocation? _pickedLocation;
   var _isGettingLocation = false;
 
+  Future<void> _savePlace(double lat, double lng) async {
+    List<Placemark> placemark = await placemarkFromCoordinates(lat, lng);
+    Placemark place = placemark[0];
+
+    final address =
+        '${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}';
+
+    // after getting location make it again false coz we get location now
+    // we show location on screen
+    setState(() {
+      _isGettingLocation = false;
+      _pickedLocation =
+          PlaceLocation(latitude: lat, longitude: lng, address: address);
+    });
+    widget.onSelectLocation(_pickedLocation!);
+  }
+
   void _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -49,26 +66,10 @@ class _LocationInputState extends State<LocationInput> {
       desiredAccuracy: LocationAccuracy.high,
     );
 
-    final lat = position.latitude;
-    final lng = position.longitude;
-
-    List<Placemark> placemark = await placemarkFromCoordinates(lat, lng);
-    Placemark place = placemark[0];
-
-    final address =
-        '${place.street}, ${place.administrativeArea}, ${place.country}';
-
-    // after getting location make it again false coz we get location now
-    // we show location on screen
-    setState(() {
-      _isGettingLocation = false;
-      _pickedLocation =
-          PlaceLocation(latitude: lat, longitude: lng, address: address);
-    });
-    widget.onSelectLocation(_pickedLocation!);
+    _savePlace(position.latitude, position.longitude);
   }
 
-  void _getUserLocation() async {
+  void _getMapLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -97,8 +98,8 @@ class _LocationInputState extends State<LocationInput> {
       _isGettingLocation = true;
     });
 
-    LatLng selectedLocation =
-        await Navigator.of(context).push(MaterialPageRoute(
+    final selectedLocation =
+        await Navigator.of(context).push<LatLng>(MaterialPageRoute(
       builder: (context) => (previousLocation == null)
           ? const MapScreen()
           : MapScreen(
@@ -106,21 +107,11 @@ class _LocationInputState extends State<LocationInput> {
             ),
     ));
 
-    List<Placemark> placemark = await placemarkFromCoordinates(
-        selectedLocation.latitude, selectedLocation.longitude);
-    Placemark place = placemark[0];
-    final address =
-        '${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}';
+    if (selectedLocation == null) {
+      return;
+    }
 
-    setState(() {
-      _isGettingLocation = false;
-      _pickedLocation = PlaceLocation(
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude,
-          address: address);
-    });
-
-    widget.onSelectLocation(_pickedLocation!);
+    _savePlace(selectedLocation.latitude, selectedLocation.longitude);
   }
 
   @override
@@ -165,7 +156,7 @@ class _LocationInputState extends State<LocationInput> {
               label: const Text('Get current location'),
             ),
             TextButton.icon(
-              onPressed: _getUserLocation,
+              onPressed: _getMapLocation,
               icon: const Icon(Icons.map),
               label: const Text('Select on Map'),
             ),
