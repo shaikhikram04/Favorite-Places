@@ -66,13 +66,6 @@ class _LocationInputState extends State<LocationInput> {
     widget.onSelectLocation(_pickedLocation!);
   }
 
-  void _saveLocation(PlaceLocation location) {
-    setState(() {
-      _pickedLocation = location;
-    });
-    widget.onSelectLocation(location);
-  }
-
   void _getUserLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -95,8 +88,8 @@ class _LocationInputState extends State<LocationInput> {
       return;
     }
 
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => MapScreen(onSelectLocation: _saveLocation),
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => const MapScreen(),
     ));
   }
 
@@ -104,16 +97,9 @@ class _LocationInputState extends State<LocationInput> {
   Widget build(BuildContext context) {
     Widget previewContent = Text(
       'No location chosen.',
-      style: Theme
-          .of(context)
-          .textTheme
-          .bodyLarge!
-          .copyWith(
-        color: Theme
-            .of(context)
-            .colorScheme
-            .onSurface,
-      ),
+      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
     );
 
     if (_isGettingLocation == true) {
@@ -136,11 +122,7 @@ class _LocationInputState extends State<LocationInput> {
           decoration: BoxDecoration(
             border: Border.all(
               width: 1,
-              color: Theme
-                  .of(context)
-                  .colorScheme
-                  .primary
-                  .withOpacity(0.2),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
             ),
           ),
           child: previewContent,
