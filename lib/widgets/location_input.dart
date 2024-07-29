@@ -4,6 +4,7 @@ import 'package:favorite_places_app/widgets/map_snapshot.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
@@ -88,9 +89,25 @@ class _LocationInputState extends State<LocationInput> {
       return;
     }
 
-    await Navigator.of(context).push(MaterialPageRoute(
+    LatLng selectedLocation =
+        await Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => const MapScreen(),
     ));
+
+    List<Placemark> placemark = await placemarkFromCoordinates(
+        selectedLocation.latitude, selectedLocation.longitude);
+    Placemark place = placemark[0];
+    final address =
+        '${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}';
+
+    setState(() {
+      _pickedLocation = PlaceLocation(
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+          address: address);
+    });
+
+    widget.onSelectLocation(_pickedLocation!);
   }
 
   @override
