@@ -41,6 +41,7 @@ class _LocationInputState extends State<LocationInput> {
     //* mark it as true -> after getPermission it true until location not get
     // coz it show loading animation until location get
     setState(() {
+      _pickedLocation = null;
       _isGettingLocation = true;
     });
 
@@ -89,6 +90,11 @@ class _LocationInputState extends State<LocationInput> {
       return;
     }
 
+    setState(() {
+      _pickedLocation = null;
+      _isGettingLocation = true;
+    });
+
     LatLng selectedLocation =
         await Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => const MapScreen(),
@@ -101,6 +107,7 @@ class _LocationInputState extends State<LocationInput> {
         '${place.street}, ${place.subLocality}, ${place.locality}, ${place.administrativeArea}, ${place.country}';
 
     setState(() {
+      _isGettingLocation = false;
       _pickedLocation = PlaceLocation(
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude,
@@ -126,7 +133,6 @@ class _LocationInputState extends State<LocationInput> {
     if (_pickedLocation != null) {
       previewContent = MapSnapshot(
         location: _pickedLocation!,
-        onTapLocation: (tapPosition, point) {},
       );
     }
 

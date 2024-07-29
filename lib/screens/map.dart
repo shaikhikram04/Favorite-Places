@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/place.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({
     super.key,
-    this.location =
-        const PlaceLocation(latitude: 37.422, longitude: -122.084, address: ''),
+    this.location = const PlaceLocation(
+        latitude: 27.17498, longitude: 78.04230, address: ''),
     this.isSelecting = true,
   });
 

@@ -4,11 +4,10 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapSnapshot extends StatelessWidget {
-  const MapSnapshot(
-      {super.key, required this.location, required this.onTapLocation});
+  const MapSnapshot({super.key, required this.location, this.onTapLocation});
 
   final PlaceLocation location;
-  final void Function(TapPosition tapPosition, LatLng point) onTapLocation;
+  final void Function(TapPosition tapPosition, LatLng point)? onTapLocation;
 
   @override
   Widget build(BuildContext context) {
