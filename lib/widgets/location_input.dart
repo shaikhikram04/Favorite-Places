@@ -86,7 +86,9 @@ class _LocationInputState extends State<LocationInput> {
       }
     }
 
-    if (!context.mounted) {
+    PlaceLocation? previousLocation = _pickedLocation;
+
+    if (!mounted) {
       return;
     }
 
@@ -97,7 +99,11 @@ class _LocationInputState extends State<LocationInput> {
 
     LatLng selectedLocation =
         await Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => const MapScreen(),
+      builder: (context) => (previousLocation == null)
+          ? const MapScreen()
+          : MapScreen(
+              location: previousLocation,
+            ),
     ));
 
     List<Placemark> placemark = await placemarkFromCoordinates(
