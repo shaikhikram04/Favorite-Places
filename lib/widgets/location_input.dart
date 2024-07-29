@@ -70,23 +70,6 @@ class _LocationInputState extends State<LocationInput> {
   }
 
   void _getMapLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        return;
-      }
-    }
-
     PlaceLocation? previousLocation = _pickedLocation;
 
     if (!mounted) {
@@ -108,6 +91,9 @@ class _LocationInputState extends State<LocationInput> {
     ));
 
     if (selectedLocation == null) {
+      setState(() {
+        _isGettingLocation = false;
+      });
       return;
     }
 
