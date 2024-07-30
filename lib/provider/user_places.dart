@@ -19,9 +19,10 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
     final appDir = await syspaths
         .getApplicationDocumentsDirectory(); // getting directory in which app data are store
     final fileName =
-        path.basename(image.path); // getting name of file of a image
+    path.basename(image.path); // getting name of file of a image
     final copiedImage = await image.copy(
-        '${appDir.path}/$fileName'); // copy image on that path into a directory of filename
+        '${appDir
+            .path}/$fileName'); // copy image on that path into a directory of filename
 
     final newPlace = Place(title: title, image: image, location: location);
 
@@ -40,6 +41,7 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
       'image': newPlace.image.path,
       'lat': newPlace.location.latitude,
       'lng': newPlace.location.longitude,
+      'address': newPlace.location.address,
     });
 
     state = [newPlace, ...state];
@@ -47,6 +49,6 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
 }
 
 final userPlacesProvider =
-    StateNotifierProvider<UserPlacesNotifier, List<Place>>(
-  (ref) => UserPlacesNotifier(),
+StateNotifierProvider<UserPlacesNotifier, List<Place>>(
+      (ref) => UserPlacesNotifier(),
 );
